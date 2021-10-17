@@ -7,7 +7,7 @@ mkdir -p $HOME/.config/dbxcli
 echo "${DB_TOKEN}" > $HOME/.config/dbxcli/auth.json
 
 # download the latest world and unpack it
-remote_world=$(dbxcli ls /Minecraft | tail -n1)
+remote_world=$(dbxcli ls -l /Minecraft | tr -s ' ' | cut -d' ' -f7 | tail -n1)
 echo "Downloading latest world: ${remote_world}"
 dbxcli get "${remote_world}" world.zip 
 echo "Extracting world"
@@ -16,4 +16,4 @@ echo "Cleaning up"
 rm world.zip
 
 
-/bin/sh
+/start

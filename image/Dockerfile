@@ -5,6 +5,6 @@ ADD https://github.com/dropbox/dbxcli/releases/download/v3.0.0/dbxcli-linux-amd6
 RUN install /dbxcli-linux-amd64 /usr/local/bin/dbxcli; \
     rm /dbxcli-linux-amd64; \
     mv /pause.sh /autopause; \
-    apk add --no-cache unzip
+    apt update && apt install unzip
 
 ENTRYPOINT ["/entrypoint.sh"]
