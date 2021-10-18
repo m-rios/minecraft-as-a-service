@@ -14,6 +14,7 @@ echo "Extracting world"
 unzip world.zip
 echo "Cleaning up"
 rm world.zip
+chown -R minecraft:minecraft world
 
 
 /start

@@ -1,4 +1,4 @@
-FROM itzg/minecraft-server
+FROM itzg/minecraft-server:2021.21.0-java16
 
 ADD https://github.com/dropbox/dbxcli/releases/download/v3.0.0/dbxcli-linux-amd64 entrypoint.sh pause.sh /
 # COPY auth.json ~/.config/dbxcli/auth.json
