@@ -5,6 +5,10 @@ services:
     image: minecraft
     stdin_open: true
     tty: true
+    ports:
+      - 25565:25565
+    # volumes:
+    #   - ./world:/data
     env_file:
       - .env
       - .env.private
