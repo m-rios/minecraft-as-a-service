@@ -17,11 +17,16 @@
         key: github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
         path: .ssh/known_hosts
         state: present
+    - name: Check if the minecraft-server repository has already been checked out
+      stat:
+        path: minecraft-server
+      register: mcrepo
     - name: Clone the minecraft-server repository
       git:
         clone: yes
         dest: minecraft-server
         repo: git@github.com:m-rios/minecraft-server.git
+      when: not mcrepo.stat.exists
     - name: Install dbxcli
       become: yes
       get_url:
@@ -30,13 +35,15 @@
         mode: 0550
         group: wheel
     - name: Make sure that .config/dbxcli/ exists
+      become: yes
       file:
         path: ~/.config/dbxcli
         state: directory
     - name: Copy dropbox credentials
+      become: yes
       copy:
         src: auth.json
-        dest: .config/dbxcli/auth.json
+        dest: ~/.config/dbxcli/auth.json
     - name: Create minecraft-universe directory
       file:
         path: minecraft-universe
