@@ -1,1 +1,1 @@
-droplet_size_slug = "s-2vcpu-2gb"
+droplet_size_slug = "s-1vcpu-1gb"

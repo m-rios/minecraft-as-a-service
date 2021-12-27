@@ -12,7 +12,7 @@ terraform {
 variable "do_token" {}
 
 variable "droplet_size_slug" {
-  type = "string"
+  type = string
   description = "The DO droplet size slug, as found in https://slugs.do-api.dev"
   default = "s-1vcpu-1gb"
 }
@@ -23,7 +23,7 @@ provider "digitalocean" {
 }
 
 resource "digitalocean_droplet" "minecraft-server" {
-  image             = "rancheros"
+  image             = "docker-20-04"
   name              = "minecraft-server"
   region            = "ams3"
   size              = var.droplet_size_slug
