@@ -1,0 +1,65 @@
+---
+- name: Install, setup and launch minecraft server
+  hosts: all
+  tasks:
+    - name: Generate ssh key
+      community.crypto.openssh_keypair:
+        path: .ssh/id_rsa
+    - name: Get .ssh/id_rsa.pub contents
+      command: cat .ssh/id_rsa.pub
+      register: command_output
+    - name: Display public ssh key. Add this to GitHub if the task below fails
+      debug:
+        msg: "{{command_output.stdout}}"
+    - name: Add GitHub to known hosts
+      known_hosts:
+        name: github.com
+        key: github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+        path: .ssh/known_hosts
+        state: present
+    - name: Clone the minecraft-server repository
+      git:
+        clone: yes
+        dest: minecraft-server
+        repo: git@github.com:m-rios/minecraft-server.git
+    - name: Install dbxcli
+      become: yes
+      get_url:
+        url: https://github.com/dropbox/dbxcli/releases/download/v3.0.0/dbxcli-linux-amd64
+        dest: /usr/local/bin/dbxcli
+        mode: 0550
+        group: wheel
+    - name: Make sure that .config/dbxcli/ exists
+      file:
+        path: ~/.config/dbxcli
+        state: directory
+    - name: Copy dropbox credentials
+      copy:
+        src: auth.json
+        dest: .config/dbxcli/auth.json
+    - name: Create minecraft-universe directory
+      file:
+        path: minecraft-universe
+        state: directory
+    - name: Check if world directory already exists
+      stat:
+        path: minecraft-universe/world
+      register: world
+    - name: Download latest world
+      shell:
+        chdir: minecraft-universe
+        cmd: "dbxcli get $(dbxcli ls -l /Minecraft | tr -s ' ' | cut -d' ' -f7 | tail -n1) world.zip && unzip world.zip && rm world.zip"
+      when: not world.stat.exists
+    - name: Install service file
+      become: yes
+      file:
+        src: minecraft-server/minecraft.service
+        dest: /etc/systemd/system/minecraft.service
+        owner: root
+        group: root
+        state: hard
+    - name: Ensure that the minecraft service is running
+      become: yes
+      systemd:
+        name: minecraft.service
+        state: started

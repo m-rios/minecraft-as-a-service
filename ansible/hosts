@@ -1,0 +1,5 @@
+all:
+  hosts:
+    minecraft.mariorios.dev
+  vars:
+    ansible_user: minecraft

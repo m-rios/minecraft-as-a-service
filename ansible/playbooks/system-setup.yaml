@@ -1,0 +1,62 @@
+---
+- name: Initial Setup of the Operating System
+  hosts: all
+  vars:
+    ansible_ssh_user: root
+  tasks:
+    - name: Create a minecraft group
+      group:
+        name: minecraft
+        state: present
+    - name: Create a minecraft user that can run docker
+      user:
+        name: minecraft
+        groups: minecraft,docker
+        shell: /bin/bash
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: visudo -cf %s
+    - name: Add minecraft user to wheel group
+      user:
+        name: minecraft
+        groups: wheel
+        append: yes
+    - name: Ensure /home/minecraft/.ssh exists
+      file:
+        path: /home/minecraft/.ssh
+        state: directory
+        owner: minecraft
+        group: minecraft
+        mode: 0700
+    - name: Copy authorized_keys from root to minecraft
+      copy:
+        src: /root/.ssh/authorized_keys
+        remote_src: yes
+        dest: /home/minecraft/.ssh/authorized_keys
+        owner: minecraft
+        group: minecraft
+    - name: Ensure apt dependencies are installed
+      apt:
+        name: git,zip,openjdk-11-jre-headless
+        update_cache: yes
+        state: present
+    - name: UFW rule to accept incoming TCP to 25565
+      ufw:
+        to_port: 25565
+        state: enabled
+        rule: allow
+        proto: tcp
+    - name: UFW rule to accept incoming UDP to 25565
+      ufw:
+        to_port: 19132
+        state: enabled
+        rule: allow
+        proto: udp 
