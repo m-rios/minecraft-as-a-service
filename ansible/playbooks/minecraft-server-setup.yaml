@@ -34,13 +34,21 @@
         dest: /usr/local/bin/dbxcli
         mode: 0550
         group: wheel
-    - name: Make sure that .config/dbxcli/ exists
+    - name: Make sure that .config/dbxcli/ exists for root
       become: yes
       file:
         path: ~/.config/dbxcli
         state: directory
-    - name: Copy dropbox credentials
+    - name: Copy dropbox credentials for root
       become: yes
+      copy:
+        src: auth.json
+        dest: ~/.config/dbxcli/auth.json
+    - name: Make sure that .config/dbxcli/ exists for minecraft
+      file:
+        path: ~/.config/dbxcli
+        state: directory
+    - name: Copy dropbox credentials for minecraft
       copy:
         src: auth.json
         dest: ~/.config/dbxcli/auth.json
@@ -65,8 +73,20 @@
         owner: root
         group: root
         state: hard
+    - name: Link allowlist
+      file:
+        src: minecraft-universe/world/whitelist.json
+        dest: minecraft-server/whitelist.json
+        state: hard
     - name: Ensure that the minecraft service is running
       become: yes
       systemd:
         name: minecraft.service
         state: started
+    - name: Create cron job for backups
+      become: yes
+      cron:
+        name: Backup minecraft world
+        hour: 4
+        job: /home/minecraft/minecraft-server/bin/backup
+        state: present

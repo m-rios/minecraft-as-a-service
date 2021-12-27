@@ -1,5 +1,6 @@
 all:
   hosts:
-    minecraft.mariorios.dev
+    68.183.4.34
+    # minecraft.mariorios.dev
   vars:
     ansible_user: minecraft
