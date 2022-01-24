@@ -45,7 +45,7 @@
         group: minecraft
     - name: Ensure apt dependencies are installed
       apt:
-        name: git,zip,openjdk-11-jre-headless
+        name: git,zip,openjdk-17-jre-headless
         update_cache: yes
         state: present
     - name: UFW rule to accept incoming TCP to 25565
