@@ -73,15 +73,28 @@
         owner: root
         group: root
         state: hard
+    - name: Install afk service file
+      become: yes
+      file:
+        src: minecraft-server/minecraft-afk.service
+        dest: /etc/systemd/system/minecraft-afk.service
+        owner: root
+        group: root
+        state: hard
     - name: Link allowlist
       file:
-        src: minecraft-universe/world/whitelist.json
-        dest: minecraft-server/whitelist.json
-        state: hard
+        src: ~/minecraft-universe/world/whitelist.json
+        dest: ~/minecraft-server/whitelist.json
+        state: link
     - name: Ensure that the minecraft service is running
       become: yes
       systemd:
         name: minecraft.service
+        state: started
+    - name: Ensure that the minecraft-afk service is running
+      become: yes
+      systemd:
+        name: minecraft-afk.service
         state: started
     - name: Create cron job for backups
       become: yes
